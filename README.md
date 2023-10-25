@@ -1,4 +1,4 @@
-# Temporary Title
+# Movie Rating Analyzer
 
 **Authors** : Victoria Le,  Nick Nguyen
 
@@ -21,7 +21,7 @@ We will collect data from the following websites:
 - [Rotten Tomatoes](https://www.rottentomatoes.com/)
 - [IMDb](https://www.imdb.com/)
 
-As many of the official APIs for the websites are not available for public use or require subscriptions, we will make use of the Beautiful Soup Python package for web scraping and acquiring movie ratings. 
+As many of the official APIs for the websites are not available for public use or require subscriptions, we will make use of the Beautiful Soup Python package for web scraping and acquiring movie ratings. Data will be collected and stored in a spreadsheet for analysis.
 
 ### Data Analysis and Visualization
 
