@@ -41,7 +41,7 @@ This project will save information from two popular movie rating sites (RottenTo
 
 ### Interface
 
-TODO
+The program will have homepage with a brief description, instructions, and a button to navigate to the analyzing page. The analytics page contains a simple dropdown menu for users to choose the type of graph they would like to generate and a side bar with a filtering system for selecting a time range. This page will also have a button to update or reset the graph after any changes to the selections they have made. Clicking the button on the analytics page will open a pop-up window where the graph will be displayed. This window will allow users to change the type of graph as well as filter the aspects they want to see.
 
 ### Data Collection/Storage
 
@@ -55,4 +55,4 @@ Data will be collected and stored as a csv file, denoting the movie title, year,
 
 ### Data Analysis and Visualization
 
-TODO
+As the lists from each website will be different, we will gather a list of the top thirty movies from each site and average any duplicates among the two. With the remaining list, we will analyze the data of the top thirty to find the most popular movie, genre, director, etc for each year. This project contains a visualization component that will generate a line chart displaying this information based on the type of graph and time range the user selects. 
