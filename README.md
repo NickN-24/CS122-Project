@@ -41,7 +41,11 @@ This project will save information from two popular movie rating sites (RottenTo
 
 ### Interface
 
-The program will have homepage with a brief description, instructions, and a button to navigate to the analyzing page. The analytics page contains a simple dropdown menu for users to choose the type of graph they would like to generate and a side bar with a filtering system for selecting a time range. This page will also have a button to update or reset the graph after any changes to the selections they have made. Clicking the button on the analytics page will open a pop-up window where the graph will be displayed. This window will allow users to change the type of graph as well as filter the aspects they want to see.
+The program will have a homepage with a brief description, instructions, and a button to navigate to the analytics page. 
+
+The analytics page contains a simple dropdown menu for users to choose the type of graph they would like to generate and a side bar with a filtering system for selecting a time range. This page will also have a button to update or reset the graph if the user chooses to make any changes to their selection. 
+
+Clicking the button on the analytics page will open a pop-up window where the graph will be displayed. This window will allow users to change the type of graph as well as filter the aspects they want to see.
 
 ### Data Collection/Storage
 
