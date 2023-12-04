@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from page import Page
+import webbrowser
 
 class HomePage(Page):
    def __init__(self, *args, **kwargs):
