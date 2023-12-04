@@ -25,7 +25,7 @@ def fetch_movie_data(year, li_element, headers) :
 
     title = re.sub(r"^\d+\.\s", "", li[11].text)
     # print(f"Title : {title}")
-    score = li[13].text.split()[0]
+    score = li[13].text.split()[0] # TODO : Fix Score ending before . (ie. 7.6 -> 7.)
     # print(f"Score : {score}")
     image = li[8].find('img')['src']
     # print(f"Image : {image}")

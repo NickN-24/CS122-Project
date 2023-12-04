@@ -20,8 +20,8 @@ class View(ctk.CTkFrame):
         p3.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
 
         b1 = ctk.CTkButton(buttonframe, text="Home Page", command=p1.show)
-        b2 = ctk.CTkButton(buttonframe, text="Analysis Page", command=p2.show)
-        b3 = ctk.CTkButton(buttonframe, text="Empty Page", command=p3.show)
+        b2 = ctk.CTkButton(buttonframe, text="Analysis", command=p2.show)
+        b3 = ctk.CTkButton(buttonframe, text="Data Management", command=p3.show)
 
         b1.pack(side="left")
         b2.pack(side="left")
