@@ -13,47 +13,68 @@ class AnalysisPage(Page):
         self.grid_columnconfigure((2, 3), weight=0)
         self.grid_rowconfigure((0, 1, 2), weight=1)
         
-        selected_option = ctk.StringVar()
+        selected_starting_year = ctk.StringVar()
+        selected_ending_year = ctk.StringVar()
 
         def on_option_select(root):
-            selected = selected_option.get()
+            selected_start = selected_starting_year.get()
+            selected_end = selected_ending_year.get()
             result_label = ctk.CTkLabel(root, text="")
-            result_label.configure(text=f"Selected Option: {selected}")
+            result_label.configure(text=f"Displaying graph for movies from {selected_start} to {selected_end}")  
             result_label.grid(row=2, column=0, padx=20, pady=20)
-            
+        
         self.tabview = ctk.CTkTabview(self, width=250)
+        self.tabview.grid(row=0, column=1, rowspan=3, padx=(20, 0), pady=20, sticky="nsew")
         self.tabview.grid(row=0, column=1, rowspan=3, padx=(20, 0), pady=20, sticky="nsew")
         self.tabview.add("Genre")
         self.tabview.add("Score")
-        self.tabview.add("Rating")
+        self.tabview.add("Ratings")
         self.tabview.tab("Genre").grid_columnconfigure(0, weight=1)
         self.tabview.tab("Score").grid_columnconfigure(0, weight=1)
-        self.tabview.tab("Rating").grid_columnconfigure(0, weight=1)
+        self.tabview.tab("Ratings").grid_columnconfigure(0, weight=1)
         
-        self.label_genre = ctk.CTkLabel(self.tabview.tab("Genre"), text="Select a year from the dropdown\n" + "menu on the right to proceed.")
+        # selecting year range for genre graph
+        self.label_genre = ctk.CTkLabel(self.tabview.tab("Genre"), text="Select a starting and ending year from the dropdown\n" + "menu on the right to proceed.")
         self.label_genre.grid(row=0, column=0, padx=20, pady=20)
-        self.button_genre = ctk.CTkButton(self.tabview.tab("Genre"), text="Display graphs for Genre Trends", command=lambda: on_option_select(self.tabview.tab("Genre")))
+        self.button_genre = ctk.CTkButton(self.tabview.tab("Genre"), text="Proceed", command=lambda: on_option_select(self.tabview.tab("Genre")))
         self.button_genre.grid(row=1, column=0, padx=20, pady=20)
         
-        self.label_score = ctk.CTkLabel(self.tabview.tab("Score"), text="Select a year from the dropdown\n" + "menu on the right to proceed.")
+        # selecting year range for score graph
+        self.label_score = ctk.CTkLabel(self.tabview.tab("Score"), text="Select a starting and ending year from the dropdown\n" + "menu on the right to proceed.")
         self.label_score.grid(row=0, column=0, padx=20, pady=20)
-        self.button_score = ctk.CTkButton(self.tabview.tab("Score"), text="Display graphs for Score Trends", command=lambda: on_option_select(self.tabview.tab("Score")))
+        self.button_score = ctk.CTkButton(self.tabview.tab("Score"), text="Proceed", command=lambda: on_option_select(self.tabview.tab("Score")))
         self.button_score.grid(row=1, column=0, padx=20, pady=20)
         
-        self.label_rating = ctk.CTkLabel(self.tabview.tab("Rating"), text="Select a year from the dropdown\n" + "menu on the right to proceed.")
+        # selecting year range for rating graph
+        self.label_rating = ctk.CTkLabel(self.tabview.tab("Ratings"), text="Select a starting and ending year from the dropdown\n" + "menu on the right to proceed.")
         self.label_rating.grid(row=0, column=0, padx=20, pady=20)
-        self.button_rating = ctk.CTkButton(self.tabview.tab("Rating"), text="Display graphs for Rating Trends", command=lambda: on_option_select(self.tabview.tab("Rating")))
+        self.button_rating = ctk.CTkButton(self.tabview.tab("Ratings"), text="Proceed", command=lambda: on_option_select(self.tabview.tab("Ratings")))
         self.button_rating.grid(row=1, column=0, padx=20, pady=20)
         
-        self.filter = ctk.CTkLabel(self, text="Select Time Range:", anchor="center")
-        self.filter.grid(row=0, column=2, padx=20, pady=(10, 0))
-        options=["2010-2011", "2011-2012", "2012-2013", "2013-2014", "2014-2015", 
-                 "2015-2016", "2016-2017", "2017-2018", "2018-2019", "2019-2020",
-                 "2020-2021", "2021-2022", "2022-2023"]
+        self.years = ctk.CTkFrame(self)
+        self.years.grid(row=0, column=2, padx=20, pady=(10, 0))
         
-        # ctk.CTkOption was giving me trouble here so its going to be a tkinter option menu for now
-        self.filter_optionemenu = tk.OptionMenu(self.filter, selected_option, *options)
-        self.filter_optionemenu.grid(row=6, column=0, padx=20, pady=(10, 10))
+        self.filter = ctk.CTkLabel(self.years, text="Select Starting Year:", anchor="center")
+        self.filter.grid(row=0, column=0, padx=20, pady=(10, 0))
+        options_start=["2010", "2011", "2012", "2013", "2014", 
+                 "2015", "2016", "2017", "2018", "2019",
+                 "2020", "2021", "2022", "2023"]
+        
+        self.filter2 = ctk.CTkLabel(self.years, text="Select Ending Year:", anchor="center")
+        self.filter2.grid(row=0, column=1, padx=20, pady=(10, 0))
+        options_end=["2011", "2012", "2013", "2014", 
+                 "2015", "2016", "2017", "2018", "2019",
+                 "2020", "2021", "2022", "2023", "2024"]
+    
+        self.filter_startoptionemenu = tk.OptionMenu(self.years, selected_starting_year, *options_start)
+        self.filter_startoptionemenu.grid(row=1, column=0, padx=20, pady=(10, 10))
+        
+        self.filter_endoptionemenu = tk.OptionMenu(self.years, selected_ending_year, *options_end)
+        self.filter_endoptionemenu.grid(row=1, column=1, padx=20, pady=(10, 10))
+
+        self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
+        self.scrollable_frame = None
+        self.scrollable_frame_switches = None
 
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
         self.scrollable_frame = None
