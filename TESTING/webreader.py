@@ -29,9 +29,13 @@ def fetch_movie_data(year, li_element, headers) :
     # print(f"Score : {score}")
     image = li[8].find('img')['src']
     # print(f"Image : {image}")
-    time = li[12].find_all("span")[1].text
+    tr = li[12].find_all("span")
+    time, rating = None, None
+    if len(tr)>1 :
+        time = li[12].find_all("span")[1].text
     # print(f"Time : {time}")
-    rating = li[12].find_all("span")[2].text
+    if len(tr)>2 :
+        rating = li[12].find_all("span")[2].text
     # print(f"Rating : {rating}")
 
     genre_url = "https://www.imdb.com"+li[11].find('a', class_="ipc-title-link-wrapper")['href']
