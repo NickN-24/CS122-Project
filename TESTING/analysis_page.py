@@ -1,8 +1,8 @@
 import customtkinter as ctk
 import tkinter as tk
 import os
-import re
 import pickle
+import webbrowser
 from page import Page
 
 class AnalysisPage(Page):
@@ -58,12 +58,6 @@ class AnalysisPage(Page):
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
         self.scrollable_frame = None
         self.scrollable_frame_switches = None
-
-        # self.filter = ctk.CTkFrame(self)
-        # self.filter.grid(row=0, column=2, padx=10, pady=20, sticky="nsew")
-        # self.label_cb = ctk.CTkLabel(master=self.filter, text="Select Years:")
-        # self.label_cb.grid(row=0, column=0)
-        # TODO : Above
             
         self.sort = ctk.CTkFrame(self, width=250)
         self.sort.grid(row=2, column=2, padx=20, pady=(0, 20), sticky="nsew")
@@ -77,13 +71,13 @@ class AnalysisPage(Page):
         self.checkbox_3.grid(row=3, column=0, pady=(10, 0), padx=20, sticky="n")
 
         # TODO : replace hardcoded years with actual values
-        self.load_movies(2010, 2011)
+        self.load_movies(2016, 2016)
 
     def load_movies(self, year_from, year_to) :
         if self.scrollable_frame != None :
             self.scrollable_frame.destroy()
         self.scrollable_frame = ctk.CTkScrollableFrame(self, width=250, label_text="Movies")
-        self.scrollable_frame.grid(row=1, column=2, padx=20, pady=(10, 10), sticky="nsew")
+        self.scrollable_frame.grid(row=1, column=2, padx=20, pady=5, sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
         if self.scrollable_frame_switches != None :
             for check, label in self.scrollable_frame_switches :
@@ -95,15 +89,17 @@ class AnalysisPage(Page):
             with open(os.path.join(self.data_dir, f"{i}_movies.pickle"),'rb') as f:
                 data = pickle.load(f)
                 for item in data :
-                    m_title = ctk.CTkButton(master=self.scrollable_frame, text=item[1])
-                    m_title.grid(row=count, column=1, pady=10, sticky="ew")
+                    m_frame = ctk.CTkFrame(master=self.scrollable_frame)
+                    m_frame.grid(row=count, column=0, pady=5, sticky="new")
+                    m_image = ctk.CTkLabel(master=m_frame, text="", image=item[3], anchor="nw")
+                    m_image.image = item[3]
+                    m_image.grid(row=0, column=0, rowspan=2, pady=1, sticky="nsew")
+                    m_title = ctk.CTkLabel(master=m_frame, text=f"{count+1}. {item[1]}", anchor="w", cursor="hand2")
+                    m_title.grid(row=0, column=1, padx=(5,1), pady=1, sticky="nsw")
+                    # Change to proper link later
+                    m_title.bind("<Button-1>", lambda e:webbrowser.open_new_tab("https://github.com/NickN-24/CS122-Project"))
+                    m_details = ctk.CTkLabel(master=m_frame, text=f"{item[0]} | {item[4]}min | ☆ {item[2]:.1f} | {item[5]}", anchor="w")
+                    m_details.grid(row=1, column=1, padx=(5,1), sticky="nsw")
+                    m_genres = ctk.CTkLabel(master=m_frame, text=f"{', '.join(item[6])}", anchor="w")
+                    m_genres.grid(row=2, column=1, padx=(5,1), sticky="nsw")
                     count+=1
-
-        # for f in os.listdir(self.data_dir):
-        #     if (re.compile(r'^\d{4}_movies\.pickle$')).match(f) :
-        #         label = ctk.CTkLabel(master=self.scrollable_frame, text=f"Year {f}")
-        #         label.grid(row=count, column=1, padx=10, pady=(0, 20), sticky="ew")
-        #         select = ctk.CTkCheckBox(master=self.scrollable_frame, text="")
-        #         select.grid(row=count, column=0, padx=10, pady=(0, 20), sticky="w")
-        #         self.scrollable_frame_switches.append((select, label))
-        #         count+=1

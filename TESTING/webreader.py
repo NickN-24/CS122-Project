@@ -2,6 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import numpy as np
+from PIL import Image
+from urllib.request import urlopen
+from io import BytesIO
+from customtkinter import CTkImage
 
 def scrape_top50(year, items=50) :
     url = f"https://www.imdb.com/search/title/?title_type=feature&release_date={year}-01-01,{year}-12-31&sort=user_rating,desc&num_votes=50000,"
@@ -18,43 +22,33 @@ def scrape_top50(year, items=50) :
         data.append(fetch_movie_data(year, li, headers))
     return np.array(data, [("Year", "i"), ("Title", "O"), ("Score", "f"),
                            ("Image", "O"), ("Time", "i"), ("Rating", "O"),
-                           ("Genres", "O"), ("Description", "O")])
+                           ("Genres", "O")])
 
 def fetch_movie_data(year, li_element, headers) :
     li = li_element.find_all("div", recursive=True)
 
     title = re.sub(r"^\d+\.\s", "", li[11].text)
-    # print(f"Title : {title}")
-    score = li[13].text.split()[0] # TODO : Fix Score ending before . (ie. 7.6 -> 7.)
-    # print(f"Score : {score}")
-    image = li[8].find('img')['src']
-    # print(f"Image : {image}")
+    score = li[13].text.split()[0]
+    image = get_ctkimage(li[8].find('img')['src'])
     tr = li[12].find_all("span")
     time, rating = None, None
     if len(tr)>1 :
         time = li[12].find_all("span")[1].text
-    # print(f"Time : {time}")
     if len(tr)>2 :
         rating = li[12].find_all("span")[2].text
-    # print(f"Rating : {rating}")
 
     genre_url = "https://www.imdb.com"+li[11].find('a', class_="ipc-title-link-wrapper")['href']
-    # print(f"Genre URL : {genre_url}")
     genre_response = requests.get(genre_url, headers=headers)
     genre_soup = BeautifulSoup(genre_response.text, "html.parser")
 
     genres = [str(g.text) for g in genre_soup.find_all("a", class_="ipc-chip ipc-chip--on-baseAlt")]
-    # print(f"Genres : {' '.join(genres)}")
 
-    description_url = genre_url.split("?")[0]+"plotsummary"
-    # print(f"Decription URL : {description_url}")
-    description_response = requests.get(description_url, headers=headers)
-    description_soup = BeautifulSoup(description_response.text, "html.parser")
+    # description_url = genre_url.split("?")[0]+"plotsummary"
+    # description_response = requests.get(description_url, headers=headers)
+    # description_soup = BeautifulSoup(description_response.text, "html.parser")
+    # description = description_soup.find("li", class_="ipc-metadata-list__item").text
 
-    description = description_soup.find("li", class_="ipc-metadata-list__item").text
-    # print(f"Description : {description}")
-
-    return (year, title, score, image, convert_to_minutes(time), rating, genres, description)
+    return (year, title, score, image, convert_to_minutes(time), rating, genres)
 
 def convert_to_minutes(time_str):
     hours = re.search(r'(\d+)h', time_str)
@@ -64,6 +58,14 @@ def convert_to_minutes(time_str):
     minutes = int(minutes.group(1)) if minutes else 0
 
     return hours * 60 + minutes
+
+def get_ctkimage(url) :
+    response = urlopen(url)
+    img = CTkImage(Image.open(BytesIO(response.read())))
+    scaling = 48/img._size[1]
+    img._size=(int(img._size[0]*scaling), int(img._size[1]*scaling))
+    response.close()
+    return img
 
 # if __name__ == "__main__" :
 #     url = "https://www.imdb.com/search/title/?title_type=feature&release_date=2010-01-01,2010-12-31&sort=user_rating,desc&num_votes=50000,"
