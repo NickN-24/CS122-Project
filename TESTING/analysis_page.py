@@ -19,6 +19,7 @@ class AnalysisPage(Page):
         
         self.selected_starting_year = ctk.StringVar()
         self.selected_ending_year = ctk.StringVar()
+        self.selected_sort = ctk.StringVar()
         
         self.tabview = ctk.CTkTabview(self, width=250)
         self.tabview.grid(row=0, column=1, rowspan=4, padx=(20, 0), pady=20, sticky="nsew")
@@ -41,6 +42,8 @@ class AnalysisPage(Page):
         years = self.get_years()
         self.selected_starting_year.set(years[0])
         self.selected_ending_year.set(years[0])
+        sort_option_list = ["Title", "Score", "Time"]
+        self.selected_sort.set(sort_option_list[1])
 
         self.filter = ctk.CTkLabel(self.years, text="Select Starting Year:", anchor="center")
         self.filter.grid(row=0, column=0, padx=20, pady=(10, 0))
@@ -52,26 +55,25 @@ class AnalysisPage(Page):
         self.filter_endoptionemenu = tk.OptionMenu(self.years, self.selected_ending_year, *years)
         self.filter_endoptionemenu.grid(row=1, column=1, padx=20, pady=(10, 10))
 
-        self.scrollable_frame = None
-        self.scrollable_frame_switches = None
-        self.data = None
-
-        self.load_movies(years[0], years[0])
         self.retrieve = ctk.CTkButton(master=self, text="Update List",
                                       command=lambda : self.load_movies(self.selected_starting_year.get(),
                                                                         self.selected_ending_year.get()))
-        self.retrieve.grid(row=2, column=2, sticky="nsew")
+        self.retrieve.grid(row=2, column=2, padx=20, sticky="nsew")
             
         self.sort = ctk.CTkFrame(self, width=250)
-        self.sort.grid(row=3, column=2, padx=20, pady=(0, 20), sticky="nsew")
+        self.sort.grid(row=3, column=2, padx=20, pady=(10, 20), sticky="nsew")
         self.label_cb = ctk.CTkLabel(master=self.sort, text="Sort by:", anchor='center')
-        self.label_cb.grid(row=0, column=0)
-        self.checkbox_1 = ctk.CTkCheckBox(master=self.sort, text="Title")
-        self.checkbox_1.grid(row=1, column=0, pady=(10, 0), padx=20, sticky="n")
-        self.checkbox_2 = ctk.CTkCheckBox(master=self.sort, text="Rating")
-        self.checkbox_2.grid(row=2, column=0, pady=(10, 0), padx=20, sticky="n")
-        self.checkbox_3 = ctk.CTkCheckBox(master=self.sort, text="Date")
-        self.checkbox_3.grid(row=3, column=0, pady=(10, 0), padx=20, sticky="n")
+        self.label_cb.grid(row=0, column=0, padx=20, pady=10, sticky="nsw")
+        self.sort_option = tk.OptionMenu(self.sort, self.selected_sort, *sort_option_list)
+        self.sort_option.grid(row=0, column=1, padx=20, pady=10, sticky="nsew")
+        self.sort_direction = ctk.CTkCheckBox(master=self.sort, text="Ascending", command=self.load_movie_scroll)
+        self.sort_direction.grid(row=0, column=2, pady=10, padx=20, sticky="nse")
+        self.selected_sort.trace("w", self.load_movie_scroll)
+
+        self.scrollable_frame = None
+        self.scrollable_frame_switches = None
+        self.data = None
+        self.load_movies(years[0], years[0])
 
     def graph_button(self, master, section) :
         self.label_rating = ctk.CTkLabel(master, text="Select a starting and ending year from the dropdown\n" + "menu on the right to proceed.")
@@ -99,7 +101,6 @@ class AnalysisPage(Page):
     def single_graph(self, year, column_name) :
         fig = plt.figure()
         flat = self.data[column_name]
-        print(self.data)
         if column_name == "Genres" :
             flat = np.concatenate(flat)
         unique_e, counts = np.unique(flat, return_counts=True)
@@ -156,10 +157,22 @@ class AnalysisPage(Page):
         plt.tight_layout()
         plt.close()
         return fig
-
+    
+    def sort_movies(self) :
+        self.data = (self.data[np.argsort(self.data, order=self.selected_sort.get())])[::1 if self.sort_direction.get() else -1]
+    
     def load_movies(self, year_from, year_to) :
         if year_from > year_to :
             year_from, year_to = year_to, year_from
+        self.data = np.concatenate([
+            pickle.load(open(os.path.join(self.data_dir, f"{i}_movies.pickle"), 'rb'))
+            for i in range(int(year_from), int(year_to) + 1)
+            if os.path.exists(os.path.join(self.data_dir, f"{i}_movies.pickle"))
+        ])
+        self.load_movie_scroll()
+
+    def load_movie_scroll(self, *args) :
+        self.sort_movies()
         if self.scrollable_frame != None :
             self.scrollable_frame.destroy()
         self.scrollable_frame = ctk.CTkScrollableFrame(self, width=250, label_text="Movies")
@@ -174,12 +187,7 @@ class AnalysisPage(Page):
                 frame.destroy()
         self.scrollable_frame_switches = []
         count = 0
-        self.data = np.concatenate([
-            pickle.load(open(os.path.join(self.data_dir, f"{i}_movies.pickle"), 'rb'))
-            for i in range(int(year_from), int(year_to) + 1)
-            if os.path.exists(os.path.join(self.data_dir, f"{i}_movies.pickle"))
-        ])
-        for item in self.data :
+        for item in self.data[:100] :
             m_frame = ctk.CTkFrame(master=self.scrollable_frame)
             m_frame.grid(row=count, column=0, pady=5, sticky="new")
             m_image = ctk.CTkLabel(master=m_frame, text="", image=item[3], anchor="nw")
