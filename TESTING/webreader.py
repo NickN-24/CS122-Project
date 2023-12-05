@@ -43,12 +43,12 @@ def fetch_movie_data(year, li_element, headers) :
 
     genres = [str(g.text) for g in genre_soup.find_all("a", class_="ipc-chip ipc-chip--on-baseAlt")]
 
-    description_url = genre_url.split("?")[0]+"plotsummary"
+    # description_url = genre_url.split("?")[0]+"plotsummary"
     # description_response = requests.get(description_url, headers=headers)
     # description_soup = BeautifulSoup(description_response.text, "html.parser")
     # description = description_soup.find("li", class_="ipc-metadata-list__item").text
 
-    return (year, title, score, image, convert_to_minutes(time), rating, genres, description_url)
+    return (year, title, score, image, convert_to_minutes(time), rating, genres, genre_url)
 
 def convert_to_minutes(time_str):
     hours = re.search(r'(\d+)h', time_str)

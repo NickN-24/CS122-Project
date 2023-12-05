@@ -14,15 +14,8 @@ class AnalysisPage(Page):
         self.grid_columnconfigure((2, 3), weight=0)
         self.grid_rowconfigure((0, 1, 2), weight=1)
         
-        selected_starting_year = ctk.StringVar()
-        selected_ending_year = ctk.StringVar()
-
-        def on_option_select(root):
-            selected_start = selected_starting_year.get()
-            selected_end = selected_ending_year.get()
-            result_label = ctk.CTkLabel(root, text="")
-            result_label.configure(text=f"Displaying graph for movies from {selected_start} to {selected_end}")  
-            result_label.grid(row=2, column=0, padx=20, pady=20)
+        self.selected_starting_year = ctk.StringVar()
+        self.selected_ending_year = ctk.StringVar()
         
         self.tabview = ctk.CTkTabview(self, width=250)
         self.tabview.grid(row=0, column=1, rowspan=3, padx=(20, 0), pady=20, sticky="nsew")
@@ -34,23 +27,10 @@ class AnalysisPage(Page):
         self.tabview.tab("Score").grid_columnconfigure(0, weight=1)
         self.tabview.tab("Ratings").grid_columnconfigure(0, weight=1)
         
-        # selecting year range for genre graph
-        self.label_genre = ctk.CTkLabel(self.tabview.tab("Genre"), text="Select a starting and ending year from the dropdown\n" + "menu on the right to proceed.")
-        self.label_genre.grid(row=0, column=0, padx=20, pady=20)
-        self.button_genre = ctk.CTkButton(self.tabview.tab("Genre"), text="Proceed", command=lambda: on_option_select(self.tabview.tab("Genre")))
-        self.button_genre.grid(row=1, column=0, padx=20, pady=20)
-        
-        # selecting year range for score graph
-        self.label_score = ctk.CTkLabel(self.tabview.tab("Score"), text="Select a starting and ending year from the dropdown\n" + "menu on the right to proceed.")
-        self.label_score.grid(row=0, column=0, padx=20, pady=20)
-        self.button_score = ctk.CTkButton(self.tabview.tab("Score"), text="Proceed", command=lambda: on_option_select(self.tabview.tab("Score")))
-        self.button_score.grid(row=1, column=0, padx=20, pady=20)
-        
-        # selecting year range for rating graph
-        self.label_rating = ctk.CTkLabel(self.tabview.tab("Ratings"), text="Select a starting and ending year from the dropdown\n" + "menu on the right to proceed.")
-        self.label_rating.grid(row=0, column=0, padx=20, pady=20)
-        self.button_rating = ctk.CTkButton(self.tabview.tab("Ratings"), text="Proceed", command=lambda: on_option_select(self.tabview.tab("Ratings")))
-        self.button_rating.grid(row=1, column=0, padx=20, pady=20)
+        # selecting year range for three graphs
+        self.graph_button(self.tabview.tab("Genre"))
+        self.graph_button(self.tabview.tab("Score"))
+        self.graph_button(self.tabview.tab("Ratings"))
         
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
         self.years = ctk.CTkFrame(self)
@@ -62,16 +42,11 @@ class AnalysisPage(Page):
         self.filter2 = ctk.CTkLabel(self.years, text="Select Ending Year:", anchor="center")
         self.filter2.grid(row=0, column=1, padx=20, pady=(10, 0))
     
-        self.filter_startoptionemenu = tk.OptionMenu(self.years, selected_starting_year, *years)
+        self.filter_startoptionemenu = tk.OptionMenu(self.years, self.selected_starting_year, *years)
         self.filter_startoptionemenu.grid(row=1, column=0, padx=20, pady=(10, 10))
-        self.filter_endoptionemenu = tk.OptionMenu(self.years, selected_ending_year, *years)
+        self.filter_endoptionemenu = tk.OptionMenu(self.years, self.selected_ending_year, *years)
         self.filter_endoptionemenu.grid(row=1, column=1, padx=20, pady=(10, 10))
 
-        self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
-        self.scrollable_frame = None
-        self.scrollable_frame_switches = None
-
-        self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
         self.scrollable_frame = None
         self.scrollable_frame_switches = None
             
@@ -89,6 +64,19 @@ class AnalysisPage(Page):
         # TODO : replace hardcoded years with actual values
         self.load_movies(2016, 2016)
 
+    def graph_button(self, master) :
+        self.label_rating = ctk.CTkLabel(master, text="Select a starting and ending year from the dropdown\n" + "menu on the right to proceed.")
+        self.label_rating.grid(row=0, column=0, padx=20, pady=20)
+        self.button_rating = ctk.CTkButton(master, text="Proceed", command=lambda: self.on_option_select(master))
+        self.button_rating.grid(row=1, column=0, padx=20, pady=20)
+
+    def on_option_select(self, root):
+        selected_start = self.selected_starting_year.get()
+        selected_end = self.selected_ending_year.get()
+        result_label = ctk.CTkLabel(root, text="")
+        result_label.configure(text=f"Displaying graph for movies from {selected_start} to {selected_end}")  
+        result_label.grid(row=2, column=0, padx=20, pady=20)    
+
     def load_movies(self, year_from, year_to) :
         if self.scrollable_frame != None :
             self.scrollable_frame.destroy()
@@ -96,9 +84,12 @@ class AnalysisPage(Page):
         self.scrollable_frame.grid(row=1, column=2, padx=20, pady=5, sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
         if self.scrollable_frame_switches != None :
-            for check, label in self.scrollable_frame_switches :
-                check.destroy()
-                label.destroy()
+            for frame, image, title, details, genres in self.scrollable_frame_switches :
+                genres.destroy()
+                details.destroy()
+                title.destroy()
+                image.destory()
+                frame.destroy()
         self.scrollable_frame_switches = []
         count=0
         for i in range(year_from, year_to+1) :
@@ -111,13 +102,14 @@ class AnalysisPage(Page):
                     m_image.image = item[3]
                     m_image.grid(row=0, column=0, rowspan=2, pady=1, sticky="nsew")
                     m_title = ctk.CTkLabel(master=m_frame, text=f"{count+1}. {item[1]}", anchor="w", cursor="hand2")
+                    m_title.bind("<Button-1>", lambda e, url=item[7]:webbrowser.open_new_tab(url))
                     m_title.grid(row=0, column=1, padx=(5,1), pady=1, sticky="nsw")
-                    m_title.url = item[7]
-                    m_title.bind("<Button-1>", lambda e:webbrowser.open_new_tab(m_title.url))
                     m_details = ctk.CTkLabel(master=m_frame, text=f"{item[0]} | {item[4]}min | ☆ {item[2]:.1f} | {item[5]}", anchor="w")
                     m_details.grid(row=1, column=1, padx=(5,1), sticky="nsw")
                     m_genres = ctk.CTkLabel(master=m_frame, text=f"{', '.join(item[6])}", anchor="w")
                     m_genres.grid(row=2, column=1, padx=(5,1), sticky="nsw")
+
+                    self.scrollable_frame_switches.append((m_frame, m_image, m_title, m_details, m_genres))
                     count+=1
 
     def get_years(self):
