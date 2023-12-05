@@ -23,9 +23,14 @@ class DataPage(Page) :
         self.delete_text.grid(row=1, column=1, padx=10, sticky="ew")
         self.data_text = ctk.CTkLabel(master=self.menu_frame, text="Input the years to grab.\nie. 1980-1984,1987,2014-2012,2022")
         self.data_text.grid(row=2, column=1, padx=10, sticky="ew")
-        self.retrieve_text = ctk.CTkTextbox(self.menu_frame, height=100)
+        self.retrieve_text = ctk.CTkTextbox(self.menu_frame, height=80)
         self.retrieve_text.insert("0.0", "1980-1984,1987,2014-2012,2022")
         self.retrieve_text.grid(row=3, column=1, columnspan=4, padx=10, sticky="ew")
+
+        self.current_text = ctk.CTkLabel(master=self.menu_frame, text="Input : ")
+        self.current_text.grid(row=1, column=2, padx=10, sticky="ew")
+        self.progress_text = ctk.CTkLabel(master=self.menu_frame, text="Progress : 0/0")
+        self.progress_text.grid(row=3, column=2, padx=10, sticky="ew")
 
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
         self.scrollable_frame = None
@@ -45,10 +50,19 @@ class DataPage(Page) :
     
     def fetch_data(self, input):
         os.makedirs(self.data_dir, exist_ok=True)
-        for year in self.get_years_from_input(input) :
+        years = self.get_years_from_input(input)
+        self.current_text.configure(text=f"Input : {years}")
+        self.current_text.update()
+        count = 0
+        self.progress_text.configure(text=f"Progress : 0/{len(years)}")
+        self.progress_text.update()
+        for year in years :
             data = webreader.scrape_top50(year, 50)
             with open(os.path.join(self.data_dir, f"{year}_movies.pickle"), "wb") as f:
                 pickle.dump(data, f)
+            count += 1
+            self.progress_text.configure(text=f"Progress : {count}/{len(years)}")
+            self.progress_text.update()
         self.update_movie_list()
 
     def get_years_from_input(self, input):

@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import tkinter as tk
 import os
+import re
 import pickle
 import webbrowser
 from page import Page
@@ -51,25 +52,19 @@ class AnalysisPage(Page):
         self.button_rating = ctk.CTkButton(self.tabview.tab("Ratings"), text="Proceed", command=lambda: on_option_select(self.tabview.tab("Ratings")))
         self.button_rating.grid(row=1, column=0, padx=20, pady=20)
         
+        self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
         self.years = ctk.CTkFrame(self)
         self.years.grid(row=0, column=2, padx=20, pady=(10, 0))
-        
+        years = self.get_years()
+
         self.filter = ctk.CTkLabel(self.years, text="Select Starting Year:", anchor="center")
         self.filter.grid(row=0, column=0, padx=20, pady=(10, 0))
-        options_start=["2010", "2011", "2012", "2013", "2014", 
-                 "2015", "2016", "2017", "2018", "2019",
-                 "2020", "2021", "2022", "2023"]
-        
         self.filter2 = ctk.CTkLabel(self.years, text="Select Ending Year:", anchor="center")
         self.filter2.grid(row=0, column=1, padx=20, pady=(10, 0))
-        options_end=["2011", "2012", "2013", "2014", 
-                 "2015", "2016", "2017", "2018", "2019",
-                 "2020", "2021", "2022", "2023", "2024"]
     
-        self.filter_startoptionemenu = tk.OptionMenu(self.years, selected_starting_year, *options_start)
+        self.filter_startoptionemenu = tk.OptionMenu(self.years, selected_starting_year, *years)
         self.filter_startoptionemenu.grid(row=1, column=0, padx=20, pady=(10, 10))
-        
-        self.filter_endoptionemenu = tk.OptionMenu(self.years, selected_ending_year, *options_end)
+        self.filter_endoptionemenu = tk.OptionMenu(self.years, selected_ending_year, *years)
         self.filter_endoptionemenu.grid(row=1, column=1, padx=20, pady=(10, 10))
 
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"data")
@@ -117,10 +112,17 @@ class AnalysisPage(Page):
                     m_image.grid(row=0, column=0, rowspan=2, pady=1, sticky="nsew")
                     m_title = ctk.CTkLabel(master=m_frame, text=f"{count+1}. {item[1]}", anchor="w", cursor="hand2")
                     m_title.grid(row=0, column=1, padx=(5,1), pady=1, sticky="nsw")
-                    # Change to proper link later
-                    m_title.bind("<Button-1>", lambda e:webbrowser.open_new_tab("https://github.com/NickN-24/CS122-Project"))
+                    m_title.url = item[7]
+                    m_title.bind("<Button-1>", lambda e:webbrowser.open_new_tab(m_title.url))
                     m_details = ctk.CTkLabel(master=m_frame, text=f"{item[0]} | {item[4]}min | ☆ {item[2]:.1f} | {item[5]}", anchor="w")
                     m_details.grid(row=1, column=1, padx=(5,1), sticky="nsw")
                     m_genres = ctk.CTkLabel(master=m_frame, text=f"{', '.join(item[6])}", anchor="w")
                     m_genres.grid(row=2, column=1, padx=(5,1), sticky="nsw")
                     count+=1
+
+    def get_years(self):
+        years = []
+        for f in os.listdir(self.data_dir):
+            if (re.compile(r'\d{4}_movies\.pickle$')).match(f) :
+                years.append(int(f[:4]))
+        return years
