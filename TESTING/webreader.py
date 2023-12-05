@@ -31,7 +31,7 @@ def fetch_movie_data(year, li_element, headers) :
     score = li[13].text.split()[0]
     image = get_ctkimage(li[8].find('img')['src'])
     tr = li[12].find_all("span")
-    time, rating = None, None
+    time, rating = "-1", "N/A"
     if len(tr)>1 :
         time = li[12].find_all("span")[1].text
     if len(tr)>2 :
