@@ -4,7 +4,7 @@
 
 ### Project Description
 
-This project will save information from two popular movie rating sites (RottenTomatoes and IMDB) to figure out a trend in popular movies. The top 30 movies of the year will be saved to a database, where users can graphically compare aspects of a movie to it's popularity. These aspects contain data such as the director, studio, genre and length of the movie. Unwanted aspects can be filtered out. A line chart with respect to time is used to represent this data, with higher values representing its average popularity.
+This project will save information from a popular movie rating sites (RottenTomatoes and IMDB) to figure out a trend in popular movies. The top 50 movies released in a given year (filtering only those that had 50000+ votes) of the year will be saved to a database, where users can graphically compare aspects of a movie to it's popularity. These aspects contain data such as the genre, score and rating of each movie. A bar chart will be used to look at a single year. If multiple years are being compared, then a line graph will be shown.
 
 ## Project Plans
 
@@ -12,23 +12,20 @@ This project will save information from two popular movie rating sites (RottenTo
 
 #### Main
 
-- [ ] Design a csv file (what are the headers)
-- [ ] Properly save web data into the csv
-    - [ ] Save data from RottenTomatoes from 2010-current
-    - [ ] Save data from IMDb from 2010-current
-- [ ] Design a simple homepage
-    - [ ] Header with project title and github link
-    - [ ] Description of the website
-    - [ ] Button to move on to the analyzing page
-- [ ] Design an analytics page
-    - [ ] Header with project title and github link
-    - [ ] Add a button to update/reset data
-    - [ ] Slot for an image
-    - [ ] Selection bar to select an aspect (drop down menu?)
-    - [ ] Aspect filtering system for the graph (side bar?)
-- [ ] Display graphs for the data
-    - [ ] Allow users to change what aspect is being graphed
-    - [ ] Allow users to filter the aspects
+- [x] Design a data file (what are the headers)
+- [x] Properly save web data from IMDb into the file
+- [x] Design a simple homepage
+    - [x] Header with project title and github link
+    - [x] Description of the website
+    - [x] Button to move on to the analyzing page
+    - [x] Button to move on to the data page
+- [x] Design an analytics page
+    - [x] Add a button to update/reset data
+    - [x] Slot for an image
+- [x] Display graphs for the data
+    - [x] Allow users to change what aspect is being graphed
+- [x] Design a data page
+    - [x] Add a button to retrieve/save/delete data
 
 
 #### Extra
@@ -38,25 +35,27 @@ This project will save information from two popular movie rating sites (RottenTo
 - [ ] A method to estimate the popularity of a movie based on inputted aspects
 - [ ] Show the two most popular movie of the latest year (if any data) on the home page
     - [ ] Save/Display the image for each movie as well
+- [ ] Filter the data on more aspects
+- [ ] Add more graphs (ie. budget)
 
 ### Interface
 
-The program will have a homepage with a brief description, instructions, and a button to navigate to the analytics page. 
+The program will have a homepage with a brief description, instructions, and a button to navigate to the analytics and data page.
 
-The analytics page contains a simple dropdown menu for users to choose the type of graph they would like to generate and a side bar with a filtering system for selecting a time range. This page will also have a button to update or reset the graph if the user chooses to make any changes to their selection. 
+The analytics page contains a simple tabbar for users to choose the type of graph they would like to generate and a side bar with a filtering system for selecting a time range. This page will also have a button to update or reset the graph if the user chooses to make any changes to their selection. On the side bar will also be a list of 100 movies that were made within the given time range, filtered according to the settings below it.
 
-Clicking the button on the analytics page will open a pop-up window where the graph will be displayed. This window will allow users to change the type of graph as well as filter the aspects they want to see.
+Clicking the button on the analytics page will display a graph based on the chosen tab (ie. Genre, Score, Rating). When swapping years, the movie list must be reupdated, before the correct graph is shown.
+
+The data page contains a list of all the movie files found in the data directory (where this program would normally save data). A textbox is given for users to input years (numbers only), where it will attempt to grab the relevant data from IMDB. Files can be checked and deleted as needed.
 
 ### Data Collection/Storage
 
-We will collect data from the following websites:
-- [Rotten Tomatoes](https://www.rottentomatoes.com/)
-- [IMDb](https://www.imdb.com/)
+We will collect data from [IMDb](https://www.imdb.com/).
 
-As many of the official APIs for the websites are not available for public use or require subscriptions, we will make use of the Beautiful Soup Python package for web scraping and acquiring movie information.
+As many of the official APIs for the website are not available for public use or require subscriptions, we will make use of the Beautiful Soup Python package for web scraping and acquiring movie information.
 
-Data will be collected and stored as a csv file, denoting the movie title, year, rating, and the rest of it's aspects. When saving data, it will only save from the last year in the csv to the current year. Any data that is read will be appended to the end of the file. A button to reset the data file will be provided.
+Data will be collected and stored as a numpy saved pickle file, denoting the movie title, year, rating, and the rest of it's aspects. When saving data, it will only save based on the user inputs. None of the files are persistent, or checked for corruption. Incase they're broken, simply use the data page and redownload the files.
 
 ### Data Analysis and Visualization
 
-As the lists from each website will be different, we will gather a list of the top thirty movies from each site and average any duplicates among the two. With the remaining list, we will analyze the data of the top thirty to find the most popular movie, genre, director, etc for each year. This project contains a visualization component that will generate a line chart displaying this information based on the type of graph and time range the user selects. 
+We will gather a list of the top fifty movies from each given year and place them all into a list. From there, we generate a bar/line plot using matplotlib, graphing the chosen data aginst the selected time range. The current options to graph are by genres, user score and rating.
